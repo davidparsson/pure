@@ -137,6 +137,8 @@ prompt_pure_preprompt_render() {
 		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f')
 	fi
 
+	[[ -n $prompt_pure_ci_status ]] && preprompt_parts+=('${prompt_pure_ci_status}')
+
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_state[username] ]] && preprompt_parts+=('${prompt_pure_state[username]}')
 	# Execution time.
@@ -315,6 +317,12 @@ prompt_pure_async_git_arrows() {
 	command git rev-list --left-right --count HEAD...@'{u}'
 }
 
+prompt_pure_async_ci_status() {
+	setopt localoptions noshwordsplit
+	builtin cd -q $1
+	command hub ci-status
+}
+
 prompt_pure_async_tasks() {
 	setopt localoptions noshwordsplit
 
@@ -337,6 +345,7 @@ prompt_pure_async_tasks() {
 		unset prompt_pure_git_last_dirty_check_timestamp
 		unset prompt_pure_git_arrows
 		unset prompt_pure_git_fetch_pattern
+		unset prompt_pure_ci_status
 		prompt_pure_vcs_info[branch]=
 		prompt_pure_vcs_info[top]=
 	fi
@@ -375,6 +384,8 @@ prompt_pure_async_refresh() {
 		# check check if there is anything to pull
 		async_job "prompt_pure" prompt_pure_async_git_dirty ${PURE_GIT_UNTRACKED_DIRTY:-1} $PWD
 	fi
+
+	async_job "prompt_pure" prompt_pure_async_ci_status $PWD
 }
 
 prompt_pure_check_git_arrows() {
@@ -394,6 +405,24 @@ prompt_pure_async_callback() {
 	local do_render=0
 
 	case $job in
+		prompt_pure_async_ci_status)
+			local prev_ci_status=$prompt_pure_ci_status
+			case $code in
+				0)
+					typeset -g prompt_pure_ci_status="%F{green}✔︎%f"
+					;;
+				1)
+					typeset -g prompt_pure_ci_status="%F{red}✖︎%f"
+					;;
+				2)
+					typeset -g prompt_pure_ci_status="%F{yellow}●%f"
+					;;
+				*)
+					unset prompt_pure_ci_status
+					;;
+			esac
+			[[ $prev_ci_status != $prompt_pure_ci_status ]] && do_render=1
+			;;
 		prompt_pure_async_vcs_info)
 			local -A info
 			typeset -gA prompt_pure_vcs_info
