@@ -127,7 +127,6 @@ prompt_pure_preprompt_render() {
 	# Set the path.
 	preprompt_parts+=('%F{blue}%~%f')
 
-	[[ -n $prompt_pure_pyenv_version ]] && preprompt_parts+=('%F{238}${prompt_pure_pyenv_version}%f')
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
 	if [[ -n $prompt_pure_vcs_info[branch] ]]; then
@@ -138,7 +137,8 @@ prompt_pure_preprompt_render() {
 		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f')
 	fi
 
-	[[ -n $prompt_pure_ci_status ]] && preprompt_parts+=('${prompt_pure_ci_status}')
+	preprompt_parts+=('${prompt_pure_ci_status:- }')
+	[[ -n $prompt_pure_pyenv_version ]] && preprompt_parts+=('%F{237}${prompt_pure_pyenv_version}%f')
 
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_state[username] ]] && preprompt_parts+=('${prompt_pure_state[username]}')
