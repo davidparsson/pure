@@ -327,7 +327,7 @@ prompt_pure_async_ci_status() {
 prompt_pure_async_pyenv_version() {
 	setopt localoptions noshwordsplit
 	builtin cd -q $1
-	command pyenv version-name
+	builtin type pyenv &> /dev/null && command pyenv version-name
 }
 
 prompt_pure_async_tasks() {
