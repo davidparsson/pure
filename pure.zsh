@@ -417,10 +417,10 @@ prompt_pure_async_callback() {
 	case $job in
 		prompt_pure_async_pyenv_version)
 			local prev_pyenv_version=$prompt_pure_pyenv_version
-			if [[ $output == "system" ]]; then
-				unset prompt_pure_pyenv_version
-			else
+			if (( $code == 0 )) && [[ $output != "system" ]]; then
 				typeset -g prompt_pure_pyenv_version="$output"
+			else
+				unset prompt_pure_pyenv_version
 			fi
 			[[ $prev_pyenv_version != $prompt_pure_pyenv_version ]] && do_render=1
 			;;
