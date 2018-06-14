@@ -127,6 +127,7 @@ prompt_pure_preprompt_render() {
 	# Set the path.
 	preprompt_parts+=('%F{blue}%~%f')
 
+	[[ -n $prompt_pure_pyenv_version ]] && preprompt_parts+=('%F{238}${prompt_pure_pyenv_version}%f')
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
 	if [[ -n $prompt_pure_vcs_info[branch] ]]; then
@@ -323,6 +324,12 @@ prompt_pure_async_ci_status() {
 	command hub ci-status
 }
 
+prompt_pure_async_pyenv_version() {
+	setopt localoptions noshwordsplit
+	builtin cd -q $1
+	command pyenv version-name
+}
+
 prompt_pure_async_tasks() {
 	setopt localoptions noshwordsplit
 
@@ -346,6 +353,7 @@ prompt_pure_async_tasks() {
 		unset prompt_pure_git_arrows
 		unset prompt_pure_git_fetch_pattern
 		unset prompt_pure_ci_status
+		unset prompt_pure_pyenv_version
 		prompt_pure_vcs_info[branch]=
 		prompt_pure_vcs_info[top]=
 	fi
@@ -386,6 +394,8 @@ prompt_pure_async_refresh() {
 	fi
 
 	async_job "prompt_pure" prompt_pure_async_ci_status $PWD
+
+	async_job "prompt_pure" prompt_pure_async_pyenv_version $PWD
 }
 
 prompt_pure_check_git_arrows() {
@@ -405,6 +415,15 @@ prompt_pure_async_callback() {
 	local do_render=0
 
 	case $job in
+		prompt_pure_async_pyenv_version)
+			local prev_pyenv_version=$prompt_pure_pyenv_version
+			if [[ $output == "system" ]]; then
+				unset prompt_pure_pyenv_version
+			else
+				typeset -g prompt_pure_pyenv_version="$output"
+			fi
+			[[ $prev_pyenv_version != $prompt_pure_pyenv_version ]] && do_render=1
+			;;
 		prompt_pure_async_ci_status)
 			local prev_ci_status=$prompt_pure_ci_status
 			case $code in
