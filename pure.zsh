@@ -434,7 +434,7 @@ prompt_pure_async_callback() {
 					[[ $output == "failure" ]] && typeset -g prompt_pure_ci_status="%F{red}✖︎%f"
 					;;
 				2)
-					typeset -g prompt_pure_ci_status="%F{yellow}●%f"
+					typeset -g prompt_pure_ci_status="%F{yellow}•%f"
 					;;
 				*)
 					unset prompt_pure_ci_status
