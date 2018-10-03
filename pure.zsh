@@ -470,6 +470,11 @@ prompt_pure_async_callback() {
 			prompt_pure_vcs_info[branch]=$info[branch]
 			prompt_pure_vcs_info[top]=$info[top]
 
+			if [[ $prompt_pure_vcs_info[branch] != $prompt_pure_vcs_info[last_branch] ]]; then
+				unset prompt_pure_ci_status
+				prompt_pure_vcs_info[last_branch]=$info[branch]
+			fi
+
 			do_render=1
 			;;
 		prompt_pure_async_git_aliases)
