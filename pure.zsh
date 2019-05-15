@@ -314,7 +314,7 @@ prompt_pure_async_git_arrows() {
 prompt_pure_async_ci_status() {
 	setopt localoptions noshwordsplit
 	builtin cd -q $1
-	builtin type hub &> /dev/null && command hub ci-status || (exit 3)
+	(builtin type hub &> /dev/null || builtin exit 3) && command hub ci-status
 }
 
 prompt_pure_async_pyenv_version() {
