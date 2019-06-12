@@ -431,10 +431,21 @@ prompt_pure_async_callback() {
 			local prev_ci_status=$prompt_pure_ci_status
 			case $code in
 				0)
-					typeset -g prompt_pure_ci_status="%F{green}✔︎%f"
+
+					if [[ $output == "neutral" ]]; then
+						typeset -g prompt_pure_ci_status="%F{gray}✔︎%f"
+					else
+						typeset -g prompt_pure_ci_status="%F{green}✔︎%f"
+					fi
 					;;
 				1)
-					[[ $output == "failure" ]] && typeset -g prompt_pure_ci_status="%F{red}✖︎%f"
+					if [[ $output == "action_required" ]]; then
+						typeset -g prompt_pure_ci_status="%F{red}▴%f"
+					elif [[ $output == "cancelled" || $output == "timed_out" ]]; then
+						typeset -g prompt_pure_ci_status="%F{gray}✖︎%f"
+					else
+						typeset -g prompt_pure_ci_status="%F{red}✖︎%f"
+					fi
 					;;
 				2)
 					typeset -g prompt_pure_ci_status="%F{yellow}•%f"
