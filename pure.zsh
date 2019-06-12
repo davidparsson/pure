@@ -496,6 +496,10 @@ prompt_pure_async_callback() {
 
 			if [[ $prompt_pure_vcs_info[branch] != $prompt_pure_vcs_info[last_branch] ]]; then
 				unset prompt_pure_ci_status
+				if [[ -n $prompt_pure_ci_status_last_check_timestamp ]]; then
+					unset prompt_pure_ci_status_last_check_timestamp
+					async_job "prompt_pure" prompt_pure_async_ci_status $PWD
+				fi
 				prompt_pure_vcs_info[last_branch]=$info[branch]
 			fi
 
