@@ -349,6 +349,7 @@ prompt_pure_async_tasks() {
 		unset prompt_pure_git_arrows
 		unset prompt_pure_git_fetch_pattern
 		unset prompt_pure_ci_status
+		unset prompt_pure_ci_status_last_check_timestamp
 		unset prompt_pure_pyenv_version
 		prompt_pure_vcs_info[branch]=
 		prompt_pure_vcs_info[top]=
@@ -389,7 +390,11 @@ prompt_pure_async_refresh() {
 		async_job "prompt_pure" prompt_pure_async_git_dirty ${PURE_GIT_UNTRACKED_DIRTY:-1}
 	fi
 
-	async_job "prompt_pure" prompt_pure_async_ci_status $PWD
+	integer time_since_last_ci_status_check=$(( EPOCHSECONDS - ${prompt_pure_ci_status_last_check_timestamp:-0} ))
+	if (( time_since_last_ci_status_check > ${PURE_GIT_DELAY_CI_STATUS_CHECK:-3} )); then
+		unset prompt_pure_ci_status_last_check_timestamp
+		async_job "prompt_pure" prompt_pure_async_ci_status $PWD
+	fi
 
 	async_job "prompt_pure" prompt_pure_async_pyenv_version $PWD
 }
@@ -455,6 +460,7 @@ prompt_pure_async_callback() {
 					;;
 			esac
 			[[ $prev_ci_status != $prompt_pure_ci_status ]] && do_render=1
+			prompt_pure_ci_status_last_check_timestamp=$EPOCHSECONDS
 			;;
 		prompt_pure_async_vcs_info)
 			local -A info
