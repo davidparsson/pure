@@ -448,7 +448,7 @@ prompt_pure_async_callback() {
 						typeset -g prompt_pure_ci_status="%F{red}▴%f"
 					elif [[ $output == "cancelled" || $output == "timed_out" ]]; then
 						typeset -g prompt_pure_ci_status="%F{gray}✖︎%f"
-					else
+					elif [[ $output == "failure" || $output == "error" ]]; then
 						typeset -g prompt_pure_ci_status="%F{red}✖︎%f"
 					fi
 					;;
