@@ -320,7 +320,7 @@ prompt_pure_async_ci_status() {
 prompt_pure_async_pyenv_version() {
 	setopt localoptions noshwordsplit
 	builtin cd -q $1
-	builtin type pyenv &> /dev/null && command pyenv version-name
+	builtin type pyenv &> /dev/null && PYENV_VERSION="$2" command pyenv version-name
 }
 
 prompt_pure_async_tasks() {
@@ -396,7 +396,7 @@ prompt_pure_async_refresh() {
 		async_job "prompt_pure" prompt_pure_async_ci_status $PWD
 	fi
 
-	async_job "prompt_pure" prompt_pure_async_pyenv_version $PWD
+	async_job "prompt_pure" prompt_pure_async_pyenv_version $PWD $PYENV_VERSION
 }
 
 prompt_pure_check_git_arrows() {
