@@ -4,10 +4,9 @@
 
 <img src="screenshot.png" width="864">
 
-
 ## Overview
 
-Most prompts are cluttered, ugly and slow. I wanted something visually pleasing that stayed out of my way.
+Most prompts are cluttered, ugly and slow. We wanted something visually pleasing that stayed out of our way.
 
 ### Why?
 
@@ -22,10 +21,9 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 - Support VI-mode indication by reverse prompt symbol (Zsh 5.3+).
 - Makes an excellent starting point for your own custom prompt.
 
-
 ## Install
 
-Can be installed with `npm` or manually. Requires Git 2.0.0+ and ZSH 5.2+. Older versions of ZSH are known to work, but they are **not** recommended.
+Can be installed with `npm` or manually. Requires Git 2.15.2+ and ZSH 5.2+. Older versions of ZSH are known to work, but they are **not** recommended.
 
 ### npm
 
@@ -37,37 +35,18 @@ That's it. Skip to [Getting started](#getting-started).
 
 ### Manually
 
-1. Either…
-  - Clone this repo
-  - add it as a submodule, or
-  - just download [`pure.zsh`](pure.zsh) and [`async.zsh`](async.zsh)
-
-2. Symlink `pure.zsh` to somewhere in [`$fpath`](https://www.refining-linux.org/archives/46-ZSH-Gem-12-Autoloading-functions.html) with the name `prompt_pure_setup`.
-
-3. Symlink `async.zsh` in `$fpath` with the name `async`.
-
-#### Example
-
-```console
-$ ln -s "$PWD/pure.zsh" /usr/local/share/zsh/site-functions/prompt_pure_setup
-$ ln -s "$PWD/async.zsh" /usr/local/share/zsh/site-functions/async
-```
-*Run `echo $fpath` to see possible locations.*
-
-For a user-specific installation (which would not require escalated privileges), simply add a directory to `$fpath` for that user:
+1. Clone this repo somewhere. Here we'll use `$HOME/.zsh/pure`.
 
 ```sh
-# .zshenv or .zshrc
-fpath=("$HOME/.zfunctions" $fpath)
+mkdir -p "$HOME/.zsh"
+git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"
 ```
 
-Then install the theme there:
-
-```console
-$ ln -s "$PWD/pure.zsh" "$HOME/.zfunctions/prompt_pure_setup"
-$ ln -s "$PWD/async.zsh" "$HOME/.zfunctions/async"
+2. Add the path of the cloned repo to `$fpath` in `$HOME/.zshrc`.
+```sh
+# .zshrc
+fpath+=$HOME/.zsh/pure
 ```
-
 
 ## Getting started
 
@@ -78,7 +57,6 @@ Initialize the prompt system (if not so already) and choose `pure`:
 autoload -U promptinit; promptinit
 prompt pure
 ```
-
 
 ## Options
 
@@ -92,7 +70,11 @@ prompt pure
 | **`PURE_PROMPT_VICMD_SYMBOL`**   | Defines the prompt symbol used when the `vicmd` keymap is active (VI-mode).                    | `❮`            |
 | **`PURE_GIT_DOWN_ARROW`**        | Defines the git down arrow symbol.                                                             | `⇣`            |
 | **`PURE_GIT_UP_ARROW`**          | Defines the git up arrow symbol.                                                               | `⇡`            |
+| **`PURE_GIT_STASH_SYMBOL`**      | Defines the git stash symbol.                                                                  | `≡`            |
 
+Showing git stash status as part of the prompt is not activated by default. To activate this you'll need to opt in via `zstyle`:
+
+`zstyle :prompt:pure:git:stash show yes`
 
 ## Colors
 
@@ -102,14 +84,18 @@ As explained in ZSH's [manual](http://zsh.sourceforge.net/Doc/Release/Zsh-Line-E
 - `#` followed by an RGB triplet in hexadecimal format, for example `#424242`. Only if your terminal supports 24-bit colors (true color) or when the [`zsh/nearcolor` module](http://zsh.sourceforge.net/Doc/Release/Zsh-Modules.html#The-zsh_002fnearcolor-Module) is loaded.
 
 Colors can be changed by using [`zstyle`](http://zsh.sourceforge.net/Doc/Release/Zsh-Modules.html#The-zsh_002fzutil-Module) with a pattern of the form `:prompt:pure:$color_name` and style `color`. The color names, their default, and what part they affect are:
-- `exec_time` (yellow) - The execution time of the last command when exceeding `PURE_CMD_MAX_EXEC_TIME`.
+- `execution_time` (yellow) - The execution time of the last command when exceeding `PURE_CMD_MAX_EXEC_TIME`.
 - `git:arrow` (cyan) - For `PURE_GIT_UP_ARROW` and `PURE_GIT_DOWN_ARROW`.
+- `git:stash` (cyan) - For `PURE_GIT_STASH_SYMBOL`.
 - `git:branch` (242) - The name of the current branch when in a Git repository.
 - `git:branch:cached` (red) - The name of the current branch when the data isn't fresh.
+- `git:action` (242) - The current action in progress (cherry-pick, rebase, etc.) when in a Git repository.
+- `git:dirty` (218) - The asterisk showing the branch is dirty.
 - `host` (242) - The hostname when on a remote machine.
 - `path` (blue) - The current path, for example, `PWD`.
 - `prompt:error` (red) - The `PURE_PROMPT_SYMBOL` when the previous command has *failed*.
 - `prompt:success` (magenta) - The `PURE_PROMPT_SYMBOL` when the previous command has *succeded*.
+- `prompt:continuation` (242) - The color for showing the state of the parser in the continuation prompt (PS2). It's the pink part in [this screenshot](https://user-images.githubusercontent.com/147409/70068574-ebc74800-15f8-11ea-84c0-8b94a4b57ff4.png), it appears in the same spot as `virtualenv`. You could for example matching both colors so that Pure has a uniform look.
 - `user` (242) - The username when on remote machine.
 - `user:root` (default) - The username when the user is root.
 - `virtualenv` (242) - The name of the Python `virtualenv` when in use.
@@ -117,17 +103,21 @@ Colors can be changed by using [`zstyle`](http://zsh.sourceforge.net/Doc/Release
 The following diagram shows where each color is applied on the prompt:
 
 ```
-path
-|          git:branch
-|          |       git:arrow
-|          |       |        host
-|          |       |        |
-~/dev/pure master* ⇡ zaphod@heartofgold  42s
-venv ❯               |                   |
-|    |               |                   exec_time
-|    |               user
-|    prompt
-virtualenv
+┌────────────────────────────────────────────────────── user
+│      ┌─────────────────────────────────────────────── host
+│      │           ┌─────────────────────────────────── path
+│      │           │          ┌──────────────────────── git:branch
+│      │           │          │     ┌────────────────── git:dirty
+│      │           │          │     │ ┌──────────────── git:action
+│      │           │          │     │ │        ┌─────── git:arrow
+│      │           │          │     │ │        │ ┌───── git:stash
+│      │           │          │     │ │        │ │ ┌─── execution_time
+│      │           │          │     │ │        │ │ │
+zaphod@heartofgold ~/dev/pure master* rebase-i ⇡ ≡ 42s
+venv ❯
+│    │
+│    └───────────────────────────────────────────────── prompt
+└────────────────────────────────────────────────────── virtualenv (or prompt:continuation)
 ```
 
 ### RGB colors
@@ -141,7 +131,6 @@ If you can't use such terminal, the module [`zsh/nearcolor`](http://zsh.sourcefo
 zmodload zsh/nearcolor
 zstyle :prompt:pure:path color '#FF0000'
 ```
-
 
 ## Example
 
@@ -159,9 +148,11 @@ zstyle :prompt:pure:path color white
 # change the color for both `prompt:success` and `prompt:error`
 zstyle ':prompt:pure:prompt:*' color cyan
 
+# turn on git stash status
+zstyle :prompt:pure:git:stash show yes
+
 prompt pure
 ```
-
 
 ## Tips
 
@@ -171,7 +162,6 @@ The [Tomorrow Night Eighties](https://github.com/chriskempson/tomorrow-theme) th
 *Just make sure you have anti-aliasing enabled in your terminal.*
 
 To have commands colorized as seen in the screenshot, install [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting).
-
 
 ## Integration
 
@@ -191,9 +181,7 @@ Add `prompt pure` to your `~/.zpreztorc`.
 
 ### [zim](https://github.com/Eriner/zim)
 
-Pure is bundled with Zim. No need to install it.
-
-Set `zprompt_theme='pure'` in `~/.zimrc`.
+Add `zmodule sindresorhus/pure --source async.zsh --source pure.zsh` to your `.zimrc` and run `zimfw install`.
 
 ### [antigen](https://github.com/zsh-users/antigen)
 
@@ -222,15 +210,14 @@ zplug mafredri/zsh-async, from:github
 zplug sindresorhus/pure, use:pure.zsh, from:github, as:theme
 ```
 
-### [zplugin](https://github.com/zdharma/zplugin)
+### [zinit](https://github.com/zdharma/zinit)
 
 Update your `.zshrc` file with the following two lines (order matters):
 
 ```sh
-zplugin ice pick"async.zsh" src"pure.zsh"
-zplugin light sindresorhus/pure
+zinit ice compile'(pure|async).zsh' pick'async.zsh' src'pure.zsh'
+zinit light sindresorhus/pure
 ```
-
 
 ## FAQ
 
@@ -238,12 +225,12 @@ There are currently no FAQs.
 
 See [FAQ Archive](https://github.com/sindresorhus/pure/wiki/FAQ-Archive) for previous FAQs.
 
-
 ## Ports
 
 - **ZSH**
 	- [therealklanni/purity](https://github.com/therealklanni/purity) - More compact current working directory, important details on the main prompt line, and extra Git indicators.
  	- [intelfx/pure](https://github.com/intelfx/pure) - Solarized-friendly colors, highly verbose, and fully async Git integration.
+	- [forivall/pure](https://github.com/forivall/pure) - A minimal fork which highlights the Git repo's root directory in the path.
 	- [dfurnes/purer](https://github.com/dfurnes/purer) - Compact single-line prompt with built-in Vim-mode indicator.
 	- [chabou/pure-now](https://github.com/chabou/pure-now) - Fork with [Now](https://zeit.co/now) support.
 	- [pure10k](https://gist.github.com/romkatv/7cbab80dcbc639003066bb68b9ae0bbf) - Configuration file for [Powerlevel10k](https://github.com/romkatv/powerlevel10k/) that makes it look like Pure.
@@ -259,9 +246,8 @@ See [FAQ Archive](https://github.com/sindresorhus/pure/wiki/FAQ-Archive) for pre
 - **PowerShell**
 	- [nickcox/pure-pwsh](https://github.com/nickcox/pure-pwsh/) - PowerShell/PS Core implementation of the Pure prompt.
 
-
 ## Team
 
-[![Sindre Sorhus](https://github.com/sindresorhus.png?size=100)](http://sindresorhus.com) | [![Mathias Fredriksson](https://github.com/mafredri.png?size=100)](https://github.com/mafredri)
+[![Sindre Sorhus](https://github.com/sindresorhus.png?size=100)](https://sindresorhus.com) | [![Mathias Fredriksson](https://github.com/mafredri.png?size=100)](https://github.com/mafredri)
 ---|---
 [Sindre Sorhus](https://github.com/sindresorhus) | [Mathias Fredriksson](https://github.com/mafredri)
